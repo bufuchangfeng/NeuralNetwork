@@ -13,3 +13,9 @@
 * cnn.ipynb                                        卷积神经网络
 * rnn.ipynb                                        循环神经网络
 * lstm.ipynb                                       长短时记忆网络
+
+
+
+# TODO
+
+* lstm temp_dc_dxx 是多余的。由于时间原因，不修改了。
