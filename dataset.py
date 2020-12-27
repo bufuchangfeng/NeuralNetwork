@@ -1,37 +1,36 @@
 import numpy as np
-import random
-
+import pandas as pd
+from scipy.io import loadmat
+from sklearn.utils import shuffle
 
 def load_mnist():
-    train_data_file = './data/mnist/train-images.idx3-ubyte'
-    train_label_file = './data/mnist/train-labels.idx1-ubyte'
-    test_data_file = './data/mnist/t10k-images.idx3-ubyte'
-    test_label_file = './data/mnist/t10k-labels.idx1-ubyte'
+    # 加载数据
+    data = loadmat("./data/mnist/mnist_all.mat")
 
-    with open(train_data_file) as f:
-        train_data = np.fromfile(f, dtype=np.uint8)[16:]
+    # print(data.keys())
 
-    with open(train_label_file) as f:
-        train_label = np.fromfile(f, dtype=np.uint8)[8:]
+    train_data = pd.DataFrame()
+    test_data = pd.DataFrame()
 
-    with open(test_data_file) as f:
-        test_data = np.fromfile(f, dtype=np.uint8)[16:]
+    for i in range(10):
+        temp_df = pd.DataFrame(data["train" + str(i)])
+        temp_df['label'] = i
+        train_data = train_data.append(temp_df)
+        temp_df = pd.DataFrame(data["test" + str(i)])
+        temp_df['label'] = i
+        test_data = test_data.append(temp_df)
 
-    with open(test_label_file) as f:
-        test_label = np.fromfile(f, dtype=np.uint8)[8:]
+    train_data = shuffle(train_data)
+    test_data = shuffle(test_data)
 
-    n_train_samples = train_label.shape[0]
-    n_test_samples  = test_label.shape[0]
+    train_labels = np.array(train_data['label'])
+    test_labels = np.array(test_data['label'])
 
-    train_data = train_data.reshape(n_train_samples, -1)
-    test_data = test_data.reshape(n_test_samples, -1)
 
-    data_label = list(zip(train_data, train_label))
-    random.shuffle(data_label)
-    train_data[:], train_label[:] = zip(*data_label)
+    train_data = train_data.drop('label', axis=1)
+    test_data = test_data.drop('label', axis=1)
 
-    data_label = list(zip(test_data, test_label))
-    random.shuffle(data_label)
-    test_data[:], test_label[:] = zip(*data_label)
+    train_data = np.array(train_data) / 255
+    test_data = np.array(test_data) / 255
 
-    return train_data, train_label, test_data, test_label
+    return train_data, test_data, train_labels, test_labels
